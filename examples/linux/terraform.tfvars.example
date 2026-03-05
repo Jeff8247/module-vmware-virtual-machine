@@ -1,0 +1,176 @@
+# =============================================================
+# terraform.tfvars.example — Linux
+#
+# Example for deploying a RHEL/Ubuntu VM from a Linux template.
+# Copy to terraform.tfvars and fill in your values.
+# =============================================================
+
+# -------------------------------------------------------------
+# vCenter connection
+# -------------------------------------------------------------
+vsphere_server               = "vcenter.example.com"
+vsphere_user                 = "administrator@vsphere.local"
+# vsphere_password — do NOT store in tfvars. Use an environment variable instead:
+#   export TF_VAR_vsphere_password="your-password"
+#   or set VSPHERE_PASSWORD for the provider's native env var support.
+vsphere_allow_unverified_ssl = false
+
+# -------------------------------------------------------------
+# vSphere infrastructure
+# -------------------------------------------------------------
+datacenter = "dc01"
+
+# Use cluster (recommended) OR resource_pool — not both.
+cluster       = "cluster01"
+resource_pool = null   # e.g. "cluster01/Resources/linux-pool"
+
+# Use datastore OR datastore_cluster — not both.
+datastore         = "datastore01"
+datastore_cluster = null
+
+# Optional: pin to a specific ESXi host.
+host = null
+
+# -------------------------------------------------------------
+# VM identity
+# -------------------------------------------------------------
+vm_name    = "prod-rhel-app01"
+vm_folder  = "Production/Linux"
+annotation = "RHEL application server — managed by Terraform"
+
+# NOTE: Tag categories and tags must already exist in vCenter before apply.
+# Create them via the vSphere UI or a separate Terraform configuration.
+tags = {
+  "Environment" = "Production"
+  "OS"          = "Linux"
+  "Owner"       = "platform-team"
+}
+
+# -------------------------------------------------------------
+# Template
+# -------------------------------------------------------------
+template_name       = "rhel-9-template"
+template_datacenter = null   # Defaults to datacenter above
+linked_clone        = false
+
+# -------------------------------------------------------------
+# CPU
+# -------------------------------------------------------------
+num_cpus             = 4
+num_cores_per_socket = 2   # 2 sockets x 2 cores
+
+cpu_hot_add_enabled = true
+cpu_reservation     = 0      # MHz; 0 = no reservation
+cpu_limit           = -1     # MHz; -1 = unlimited
+cpu_share_level     = "normal"
+
+# -------------------------------------------------------------
+# Memory
+# -------------------------------------------------------------
+memory = 8192   # MB
+
+memory_hot_add_enabled = true
+memory_reservation     = 0     # MB
+memory_limit           = -1    # MB; -1 = unlimited
+memory_share_level     = "normal"
+
+# -------------------------------------------------------------
+# Disks
+# -------------------------------------------------------------
+scsi_type             = "pvscsi"
+scsi_controller_count = 1
+
+disks = [
+  # OS disk
+  {
+    label            = "disk0"
+    size             = 60
+    unit_number      = 0
+    thin_provisioned = true
+    keep_on_remove   = false
+  },
+
+  # Data disk
+  {
+    label            = "disk1"
+    size             = 100
+    unit_number      = 1
+    thin_provisioned = true
+    keep_on_remove   = true   # Retain on destroy for data safety
+  },
+
+  # Log disk
+  {
+    label            = "disk2"
+    size             = 50
+    unit_number      = 2
+    thin_provisioned = true
+    keep_on_remove   = false
+    io_limit         = 500    # IOPS cap
+  },
+]
+
+# -------------------------------------------------------------
+# Network interfaces
+# -------------------------------------------------------------
+network_interfaces = [
+  {
+    network_name = "VM-MGMT-VLAN100"
+    adapter_type = "vmxnet3"   # vmxnet3 | e1000 | e1000e
+  },
+  {
+    network_name = "VM-DATA-VLAN200"
+    adapter_type = "vmxnet3"   # vmxnet3 | e1000 | e1000e
+  },
+]
+
+# -------------------------------------------------------------
+# IP customization (matched positionally to NICs above)
+# Leave ip_settings = [] for DHCP on all interfaces.
+# -------------------------------------------------------------
+ip_settings = [
+  {
+    ipv4_address = "192.168.100.50"
+    ipv4_netmask = 24
+  },
+  {
+    ipv4_address = "10.20.200.50"
+    ipv4_netmask = 24
+  },
+]
+
+ipv4_gateway    = "192.168.100.1"
+dns_servers     = ["192.168.1.10", "192.168.1.11"]
+dns_suffix_list = ["example.com", "internal.example.com"]
+
+# -------------------------------------------------------------
+# Guest OS — Linux
+# The customization engine sets the hostname and domain on
+# first boot via VMware Tools. No reboot is required.
+# -------------------------------------------------------------
+guest_id      = "rhel9_64Guest"
+computer_name = "prod-rhel-app01"          # Defaults to vm_name if null
+domain        = "example.com"
+time_zone     = "America/New_York"         # Olson TZ string
+
+# -------------------------------------------------------------
+# Hardware & firmware
+# -------------------------------------------------------------
+firmware         = "bios"   # bios | efi
+hardware_version = null      # null = inherit from template
+
+enable_disk_uuid  = true     # Required for Kubernetes / vSAN workloads
+nested_hv_enabled = false    # true for nested VMware/KVM workloads
+
+wait_for_guest_net_timeout  = 5    # seconds; -1 to skip
+wait_for_guest_net_routable = true
+
+customize_timeout = 30   # minutes; increase in slow environments
+
+# -------------------------------------------------------------
+# Advanced VMX configuration (optional)
+# -------------------------------------------------------------
+extra_config = {
+  "sched.mem.balloon.enable" = "FALSE"
+  "tools.syncTime"           = "FALSE"
+}

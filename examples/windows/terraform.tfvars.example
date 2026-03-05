@@ -1,0 +1,199 @@
+# =============================================================
+# terraform.tfvars.example — Windows
+#
+# Example for deploying a Windows Server VM from a Windows
+# template with Sysprep-based computer rename and domain join.
+# Copy to terraform.tfvars and fill in your values.
+# =============================================================
+
+# -------------------------------------------------------------
+# vCenter connection
+# -------------------------------------------------------------
+vsphere_server               = "vcenter.example.com"
+vsphere_user                 = "administrator@vsphere.local"
+# vsphere_password — do NOT store in tfvars. Use an environment variable instead:
+#   export TF_VAR_vsphere_password="your-password"
+#   or set VSPHERE_PASSWORD for the provider's native env var support.
+vsphere_allow_unverified_ssl = false
+
+# -------------------------------------------------------------
+# vSphere infrastructure
+# -------------------------------------------------------------
+datacenter = "dc01"
+
+# Use cluster (recommended) OR resource_pool — not both.
+cluster       = "cluster01"
+resource_pool = null   # e.g. "cluster01/Resources/windows-pool"
+
+# Use datastore OR datastore_cluster — not both.
+datastore         = "datastore01"
+datastore_cluster = null
+
+# Optional: pin to a specific ESXi host.
+host = null
+
+# -------------------------------------------------------------
+# VM identity
+# -------------------------------------------------------------
+vm_name    = "prod-win-app01"
+vm_folder  = "Production/Windows"
+annotation = "Windows application server — managed by Terraform"
+
+# NOTE: Tag categories and tags must already exist in vCenter before apply.
+# Create them via the vSphere UI or a separate Terraform configuration.
+tags = {
+  "Environment" = "Production"
+  "OS"          = "Windows"
+  "Owner"       = "platform-team"
+}
+
+# -------------------------------------------------------------
+# Template
+# The Windows template must have VMware Tools installed.
+# It should be in a generalised (Sysprepped) state or have
+# a clean snapshot for linked clones.
+# -------------------------------------------------------------
+template_name       = "windows-server-2022-template"
+template_datacenter = null   # Defaults to datacenter above
+linked_clone        = false
+
+# -------------------------------------------------------------
+# CPU
+# -------------------------------------------------------------
+num_cpus             = 4
+num_cores_per_socket = 2   # 2 sockets x 2 cores
+
+cpu_hot_add_enabled = true
+cpu_reservation     = 0
+cpu_limit           = -1
+cpu_share_level     = "normal"
+
+# -------------------------------------------------------------
+# Memory
+# -------------------------------------------------------------
+memory = 8192   # MB
+
+memory_hot_add_enabled = true
+memory_reservation     = 0
+memory_limit           = -1
+memory_share_level     = "normal"
+
+# -------------------------------------------------------------
+# Disks
+# -------------------------------------------------------------
+scsi_type             = "pvscsi"
+scsi_controller_count = 1
+
+disks = [
+  # OS disk (C:\)
+  {
+    label            = "disk0"
+    size             = 80
+    unit_number      = 0
+    thin_provisioned = true
+    keep_on_remove   = false
+  },
+
+  # Data disk (D:\)
+  {
+    label            = "disk1"
+    size             = 100
+    unit_number      = 1
+    thin_provisioned = true
+    keep_on_remove   = true   # Retain on destroy for data safety
+  },
+]
+
+# -------------------------------------------------------------
+# Network interfaces
+# -------------------------------------------------------------
+network_interfaces = [
+  {
+    network_name = "VM-MGMT-VLAN100"
+    adapter_type = "vmxnet3"   # vmxnet3 | e1000 | e1000e
+  },
+]
+
+# -------------------------------------------------------------
+# IP customization (matched positionally to NICs above)
+# Leave ip_settings = [] for DHCP on all interfaces.
+# -------------------------------------------------------------
+ip_settings = [
+  {
+    ipv4_address = "192.168.100.60"
+    ipv4_netmask = 24
+  },
+]
+
+ipv4_gateway    = "192.168.100.1"
+dns_servers     = ["192.168.1.10", "192.168.1.11"]
+dns_suffix_list = ["corp.example.com"]
+
+# -------------------------------------------------------------
+# Guest OS — Windows
+#
+# Sysprep runs on first boot and performs these steps in order:
+#   1. Renames the computer to computer_name (or vm_name).
+#   2. Joins the domain specified by windows_domain.
+#   3. Reboots into the domain before the first logon.
+#
+# computer_name must be 15 characters or fewer (NetBIOS limit).
+# -------------------------------------------------------------
+guest_id      = "windows2022srvNext_64Guest"
+computer_name = "prod-win-app01"
+
+# Windows time zone numeric index.
+# Common values:
+#   85  = Eastern Standard Time (UTC-5)
+#   90  = Central Standard Time (UTC-6)
+#   95  = Mountain Standard Time (UTC-7)
+#   105 = Pacific Standard Time (UTC-8)
+#   110 = GMT Standard Time (UTC+0)
+#   115 = W. Europe Standard Time (UTC+1)
+time_zone = "85"
+
+# Local administrator account set by Sysprep.
+# windows_admin_password — do NOT store in tfvars. Use an environment variable:
+#   export TF_VAR_windows_admin_password="your-password"
+
+# Workgroup — default for standalone VMs. Set windows_domain to join an AD domain instead.
+windows_workgroup   = "WORKGROUP"
+windows_domain      = null   # Set to join an AD domain (also requires windows_domain_user/password)
+windows_domain_user = null
+# windows_domain_password — do NOT store in tfvars. Use an environment variable:
+#   export TF_VAR_windows_domain_password="your-password"
+domain              = null   # DNS domain suffix set on the guest (e.g. corp.example.com)
+
+# Auto-logon after Sysprep (useful for running bootstrap scripts).
+windows_auto_logon       = true
+windows_auto_logon_count = 1
+
+# Commands to run once after Sysprep completes.
+# Use this for initial bootstrap (e.g. install agents, apply GPO, run DSC).
+windows_run_once = [
+  "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -ExecutionPolicy Bypass -File C:\\bootstrap.ps1",
+]
+
+# -------------------------------------------------------------
+# Hardware & firmware
+# Windows Server 2022 works best with EFI firmware.
+# -------------------------------------------------------------
+firmware         = "efi"
+hardware_version = null   # null = inherit from template
+
+enable_disk_uuid = true
+vbs_enabled      = false  # Set true to enable Virtualization-based Security
+
+wait_for_guest_net_timeout  = 5
+wait_for_guest_net_routable = true
+
+# Sysprep + domain join can be slow; 60 minutes is a safe default for Windows.
+customize_timeout = 60
+
+# -------------------------------------------------------------
+# Advanced VMX configuration (optional)
+# -------------------------------------------------------------
+extra_config = {
+  "sched.mem.balloon.enable" = "FALSE"
+  "tools.syncTime"           = "FALSE"
+}

@@ -1,0 +1,175 @@
+# =============================================================
+# terraform.tfvars.example — Harbor Container Registry (OVA)
+#
+# Deploys Harbor from a vSphere template created by importing
+# the Harbor OVA. See main.tf for the one-time OVA import steps.
+#
+# Copy to terraform.tfvars and fill in your values.
+#
+# SENSITIVE VARIABLES — set as environment variables, never in this file:
+#   export TF_VAR_vsphere_password="your-vcenter-password"
+#   export TF_VAR_harbor_admin_password="your-harbor-admin-password"
+#   export TF_VAR_harbor_db_password="your-harbor-db-password"
+# =============================================================
+
+# -------------------------------------------------------------
+# vCenter connection
+# -------------------------------------------------------------
+vsphere_server               = "vcenter.example.com"
+vsphere_user                 = "administrator@vsphere.local"
+vsphere_allow_unverified_ssl = false
+
+# -------------------------------------------------------------
+# vSphere infrastructure
+# -------------------------------------------------------------
+datacenter = "dc01"
+
+# Use cluster (recommended) OR resource_pool — not both.
+cluster       = "cluster01"
+resource_pool = null
+
+# Use datastore OR datastore_cluster — not both.
+datastore         = "datastore01"
+datastore_cluster = null
+
+host = null
+
+# -------------------------------------------------------------
+# VM identity
+# -------------------------------------------------------------
+vm_name    = "harbor-registry-01"
+vm_folder  = "Infrastructure/Registry"
+annotation = "Harbor container registry v2.12 — managed by Terraform"
+
+# NOTE: Tag categories and tags must already exist in vCenter before apply.
+# Create them via the vSphere UI or a separate Terraform configuration.
+tags = {
+  "Environment" = "Production"
+  "Role"        = "Registry"
+  "Owner"       = "platform-team"
+}
+
+# -------------------------------------------------------------
+# Template
+#
+# Created once with:
+#   govc import.ova -name=harbor-2.12-template \
+#     -ds=datastore01 harbor-offline-installer-v2.12.0.ova
+#   govc vm.markastemplate harbor-2.12-template
+#
+# OVA download: https://github.com/goharbor/harbor/releases
+# -------------------------------------------------------------
+template_name       = "harbor-2.12-template"
+template_datacenter = null   # Defaults to datacenter above
+
+# -------------------------------------------------------------
+# CPU — Harbor minimum 2 vCPUs; production recommendation 4
+# -------------------------------------------------------------
+num_cpus             = 4
+num_cores_per_socket = 2   # 2 sockets x 2 cores
+
+cpu_reservation = 0
+cpu_limit       = -1
+
+# -------------------------------------------------------------
+# Memory — Harbor minimum 4096 MB; production recommendation 8192
+# -------------------------------------------------------------
+memory = 8192   # MB
+
+memory_reservation = 0
+memory_limit       = -1
+
+# -------------------------------------------------------------
+# Disks
+#
+# The Harbor OVA bundles its own OS disk and a /data volume.
+# Leave disks = [] to keep the template disks unchanged.
+# Add entries only to provision additional storage volumes.
+#
+# Example: add a 500 GB data disk on unit 1 for registry blobs
+# disks = [
+#   {
+#     label            = "harbor-data"
+#     size             = 500
+#     unit_number      = 1
+#     thin_provisioned = true
+#     keep_on_remove   = true   # Retain registry data on VM destroy
+#   },
+# ]
+# -------------------------------------------------------------
+disks = []
+
+scsi_type             = "pvscsi"
+scsi_controller_count = 1
+
+# -------------------------------------------------------------
+# Network interfaces
+# -------------------------------------------------------------
+network_interfaces = [
+  {
+    network_name = "VM-INFRA-VLAN300"
+    adapter_type = "vmxnet3"   # vmxnet3 | e1000 | e1000e
+  },
+]
+
+# -------------------------------------------------------------
+# IP customization
+# Static IP is strongly recommended for a registry — clients
+# and CI/CD pipelines cache the registry address.
+# -------------------------------------------------------------
+ip_settings = [
+  {
+    ipv4_address = "192.168.30.20"
+    ipv4_netmask = 24
+  },
+]
+
+ipv4_gateway    = "192.168.30.1"
+dns_servers     = ["192.168.1.10", "192.168.1.11"]
+dns_suffix_list = ["example.com"]
+
+# -------------------------------------------------------------
+# Guest OS (Photon OS 4)
+# Photon OS supports VMware guest customization, so hostname
+# and IP are set here via the standard customization path.
+# Harbor reads its own config from vapp_properties below.
+# -------------------------------------------------------------
+guest_id      = "vmwarePhoton64Guest"
+computer_name = "harbor-registry-01"
+domain        = "example.com"
+time_zone     = "America/New_York"
+
+# -------------------------------------------------------------
+# Hardware & firmware
+# Harbor OVA ships as EFI; keep firmware = "efi".
+# -------------------------------------------------------------
+firmware         = "efi"
+hardware_version = null   # null = inherit from template
+
+enable_disk_uuid = true
+
+# Harbor services can take 60–90 s to initialise after boot;
+# wait long enough for VMware Tools to report a routable IP.
+wait_for_guest_net_timeout  = 5
+wait_for_guest_net_routable = true
+
+customize_timeout = 30
+
+# -------------------------------------------------------------
+# Harbor vApp Properties
+#
+# These are injected into the OVF environment on first boot.
+# Harbor's boot script reads them to write /etc/harbor/harbor.yml
+# before starting services.
+#
+# SENSITIVE VALUES — set via environment variables (see top of file):
+#   harbor_admin_password
+#   harbor_db_password
+#
+# To verify exact property keys for your OVA version:
+#   govc import.spec harbor-offline-installer-v2.12.0.ova \
+#     | jq '.PropertyMapping[].Key'
+# -------------------------------------------------------------
+harbor_hostname  = "harbor.example.com"   # Must resolve to the VM's IP
+harbor_log_level = "info"                 # debug | info | warning | error | fatal
+harbor_gc_enabled = true                  # Scheduled garbage collection
