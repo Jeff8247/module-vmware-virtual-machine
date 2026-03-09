@@ -242,6 +242,16 @@ variable "disks" {
     condition     = alltrue([for d in var.disks : contains(["scsi", "ide"], d.controller_type)])
     error_message = "Each disk.controller_type must be one of: scsi, ide."
   }
+
+  validation {
+    condition     = length(var.disks) == length(distinct([for d in var.disks : d.unit_number]))
+    error_message = "Each disk must have a unique unit_number."
+  }
+
+  validation {
+    condition     = length(var.disks) == length(distinct([for d in var.disks : d.label]))
+    error_message = "Each disk must have a unique label."
+  }
 }
 
 variable "scsi_type" {
@@ -309,6 +319,11 @@ variable "network_interfaces" {
     condition     = alltrue([for nic in var.network_interfaces : contains(["low", "normal", "high", "custom"], nic.bandwidth_share_level)])
     error_message = "Each network_interface.bandwidth_share_level must be one of: low, normal, high, custom."
   }
+
+  validation {
+    condition     = length(var.network_interfaces) > 0
+    error_message = "At least one network_interface must be specified."
+  }
 }
 
 variable "ip_settings" {
@@ -324,6 +339,19 @@ variable "ip_settings" {
     ipv4_netmask = number
   }))
   default = []
+
+  validation {
+    condition = alltrue([
+      for ip in var.ip_settings :
+      can(regex("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$", ip.ipv4_address))
+    ])
+    error_message = "Each ip_settings.ipv4_address must be a valid IPv4 address."
+  }
+
+  validation {
+    condition     = alltrue([for ip in var.ip_settings : ip.ipv4_netmask >= 1 && ip.ipv4_netmask <= 30])
+    error_message = "Each ip_settings.ipv4_netmask must be between 1 and 30."
+  }
 }
 
 variable "ipv4_gateway" {

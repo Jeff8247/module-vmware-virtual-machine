@@ -146,7 +146,7 @@ resource "vsphere_virtual_machine" "this" {
         for_each = var.is_windows ? [] : [1]
         content {
           host_name = local.computer_name
-          domain    = var.domain != null ? var.domain : ""
+          domain    = var.domain
           time_zone = var.time_zone
         }
       }
