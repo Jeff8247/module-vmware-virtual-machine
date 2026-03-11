@@ -44,8 +44,9 @@ resource "vsphere_virtual_machine" "this" {
 
   guest_id = var.guest_id
 
-  firmware         = var.firmware
-  hardware_version = var.hardware_version
+  firmware             = var.firmware
+  hardware_version     = var.hardware_version
+  tools_upgrade_policy = var.tools_upgrade_policy
 
   num_cpus               = var.num_cpus
   num_cores_per_socket   = var.num_cores_per_socket
