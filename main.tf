@@ -71,9 +71,10 @@ resource "vsphere_virtual_machine" "this" {
   scsi_controller_count = var.scsi_controller_count
   scsi_bus_sharing      = var.scsi_bus_sharing
 
-  nested_hv_enabled     = var.nested_hv_enabled
-  vbs_enabled           = var.vbs_enabled
-  vvtd_enabled          = var.vvtd_enabled
+  nested_hv_enabled       = var.nested_hv_enabled
+  vbs_enabled             = var.vbs_enabled
+  vvtd_enabled            = var.vvtd_enabled
+  efi_secure_boot_enabled = var.efi_secure_boot_enabled
   enable_disk_uuid      = var.enable_disk_uuid
   enable_logging        = var.enable_logging
   swap_placement_policy = var.swap_placement_policy
@@ -149,9 +150,10 @@ resource "vsphere_virtual_machine" "this" {
       dynamic "linux_options" {
         for_each = var.is_windows ? [] : [1]
         content {
-          host_name = local.computer_name
-          domain    = var.domain
-          time_zone = var.time_zone
+          host_name   = local.computer_name
+          domain      = var.domain
+          time_zone   = var.time_zone
+          script_text = var.linux_script_text
         }
       }
 
@@ -239,6 +241,12 @@ resource "vsphere_virtual_machine" "this" {
     precondition {
       condition     = !var.vbs_enabled || var.firmware == "efi"
       error_message = "vbs_enabled = true requires firmware = 'efi'."
+    }
+
+    # Secure Boot requires EFI firmware.
+    precondition {
+      condition     = !var.efi_secure_boot_enabled || var.firmware == "efi"
+      error_message = "efi_secure_boot_enabled = true requires firmware = 'efi'."
     }
 
     # When CDROM is enabled without client_device, an ISO path must be provided.

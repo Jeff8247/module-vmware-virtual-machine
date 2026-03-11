@@ -281,6 +281,7 @@ export TF_VAR_harbor_db_password="your-harbor-db-password"
 | `windows_auto_logon` | Enable auto-logon after customization | `bool` | `false` | no |
 | `windows_auto_logon_count` | Auto-logon count | `number` | `1` | no |
 | `windows_run_once` | Commands to run once post-customization | `list(string)` | `[]` | no |
+| `linux_script_text` | Inline shell script to run during Linux guest customization | `string` | `null` | no |
 
 ### Hardware & Firmware
 
@@ -291,6 +292,7 @@ export TF_VAR_harbor_db_password="your-harbor-db-password"
 | `tools_upgrade_policy` | VMware Tools upgrade policy (`manual` or `upgradeAtPowerCycle`) | `string` | `"manual"` | no |
 | `nested_hv_enabled` | Nested hardware virtualization | `bool` | `false` | no |
 | `vbs_enabled` | Virtualization-based Security | `bool` | `false` | no |
+| `efi_secure_boot_enabled` | Enable EFI Secure Boot (requires firmware = efi; recommended with vbs_enabled) | `bool` | `false` | no |
 | `vvtd_enabled` | Intel VT-d pass-through | `bool` | `false` | no |
 | `enable_disk_uuid` | Expose disk UUIDs to guest | `bool` | `true` | no |
 | `enable_logging` | Enable VMX logging | `bool` | `false` | no |

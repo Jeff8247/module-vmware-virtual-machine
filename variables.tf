@@ -462,6 +462,12 @@ variable "windows_run_once" {
   default     = []
 }
 
+variable "linux_script_text" {
+  description = "Inline shell script to run during Linux guest customization. Requires open-vm-tools to support script execution."
+  type        = string
+  default     = null
+}
+
 variable "firmware" {
   description = "VM firmware type. One of: bios, efi."
   type        = string
@@ -497,6 +503,12 @@ variable "nested_hv_enabled" {
 
 variable "vbs_enabled" {
   description = "Enable Virtualization-based Security (Windows only)."
+  type        = bool
+  default     = false
+}
+
+variable "efi_secure_boot_enabled" {
+  description = "Enable EFI Secure Boot. Requires firmware = 'efi'. Recommended when vbs_enabled = true."
   type        = bool
   default     = false
 }
