@@ -90,9 +90,9 @@ variable "num_cpus" {
 }
 
 variable "num_cores_per_socket" {
-  description = "Number of cores per virtual socket."
+  description = "Number of cores per virtual socket. Defaults to num_cpus (single socket) when null."
   type        = number
-  default     = 1
+  default     = null
 }
 
 variable "cpu_hot_add_enabled" {

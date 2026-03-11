@@ -22,6 +22,9 @@ locals {
   # Map of network_name → network_id consumed by the NIC dynamic block
   network_ids = { for nic in var.network_interfaces : nic.network_name => data.vsphere_network.this[nic.network_name].id }
 
+  # Default num_cores_per_socket to num_cpus (single socket) when not explicitly set
+  num_cores_per_socket = var.num_cores_per_socket != null ? var.num_cores_per_socket : var.num_cpus
+
   # Pair each NIC with its IP settings; interfaces without an entry fall back to DHCP (null values)
   nic_ip_settings = [
     for i, nic in var.network_interfaces : (
@@ -49,7 +52,7 @@ resource "vsphere_virtual_machine" "this" {
   tools_upgrade_policy = var.tools_upgrade_policy
 
   num_cpus               = var.num_cpus
-  num_cores_per_socket   = var.num_cores_per_socket
+  num_cores_per_socket   = local.num_cores_per_socket
   cpu_hot_add_enabled    = var.cpu_hot_add_enabled
   cpu_hot_remove_enabled = var.cpu_hot_remove_enabled
   cpu_limit              = var.cpu_limit
@@ -221,7 +224,7 @@ resource "vsphere_virtual_machine" "this" {
 
     # num_cpus must be evenly divisible by num_cores_per_socket (vSphere API requirement).
     precondition {
-      condition     = var.num_cpus % var.num_cores_per_socket == 0
+      condition     = var.num_cpus % local.num_cores_per_socket == 0
       error_message = "num_cpus must be evenly divisible by num_cores_per_socket."
     }
 
