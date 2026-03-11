@@ -57,7 +57,7 @@ linked_clone        = false
 # CPU
 # -------------------------------------------------------------
 num_cpus             = 4
-num_cores_per_socket = 2   # 2 sockets x 2 cores
+# num_cores_per_socket defaults to num_cpus (single socket); override only if multi-socket is required
 
 cpu_hot_add_enabled = true
 cpu_reservation     = 0      # MHz; 0 = no reservation

@@ -66,7 +66,7 @@ template_datacenter = null   # Defaults to datacenter above
 # CPU — Harbor minimum 2 vCPUs; production recommendation 4
 # -------------------------------------------------------------
 num_cpus             = 4
-num_cores_per_socket = 2   # 2 sockets x 2 cores
+# num_cores_per_socket defaults to num_cpus (single socket); override only if multi-socket is required
 
 cpu_reservation = 0
 cpu_limit       = -1
