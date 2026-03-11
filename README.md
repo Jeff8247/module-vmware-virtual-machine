@@ -220,7 +220,7 @@ export TF_VAR_harbor_db_password="your-harbor-db-password"
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|----------|
 | `num_cpus` | Total vCPUs | `number` | `2` | no |
-| `num_cores_per_socket` | Cores per socket | `number` | `1` | no |
+| `num_cores_per_socket` | Cores per socket (defaults to `num_cpus` for single-socket topology) | `number` | `null` | no |
 | `cpu_hot_add_enabled` | Allow CPU hot-add | `bool` | `false` | no |
 | `cpu_hot_remove_enabled` | Allow CPU hot-remove | `bool` | `false` | no |
 | `cpu_limit` | CPU limit in MHz (-1 = unlimited) | `number` | `-1` | no |
@@ -287,6 +287,7 @@ export TF_VAR_harbor_db_password="your-harbor-db-password"
 |------|-------------|------|---------|----------|
 | `firmware` | Firmware type (bios/efi) | `string` | `"bios"` | no |
 | `hardware_version` | Virtual hardware version | `number` | `null` | no |
+| `tools_upgrade_policy` | VMware Tools upgrade policy (`manual` or `upgradeAtPowerCycle`) | `string` | `"manual"` | no |
 | `nested_hv_enabled` | Nested hardware virtualization | `bool` | `false` | no |
 | `vbs_enabled` | Virtualization-based Security | `bool` | `false` | no |
 | `vvtd_enabled` | Intel VT-d pass-through | `bool` | `false` | no |
