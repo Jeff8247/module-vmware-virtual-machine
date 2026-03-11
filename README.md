@@ -277,6 +277,7 @@ export TF_VAR_harbor_db_password="your-harbor-db-password"
 | `windows_domain` | AD domain to join | `string` | `null` | no |
 | `windows_domain_user` | Domain join user | `string` | `null` | no |
 | `windows_domain_password` | Domain join password | `string` | `null` | no |
+| `windows_domain_ou` | OU distinguished name for the computer object (null = default Computers container) | `string` | `null` | no |
 | `windows_auto_logon` | Enable auto-logon after customization | `bool` | `false` | no |
 | `windows_auto_logon_count` | Auto-logon count | `number` | `1` | no |
 | `windows_run_once` | Commands to run once post-customization | `list(string)` | `[]` | no |

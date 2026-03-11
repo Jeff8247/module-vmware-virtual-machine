@@ -433,6 +433,12 @@ variable "windows_domain_password" {
   default     = null
 }
 
+variable "windows_domain_ou" {
+  description = "Distinguished name of the OU to place the computer object in when joining a domain (e.g. OU=Servers,OU=IT,DC=corp,DC=example,DC=com). Null places the object in the default Computers container."
+  type        = string
+  default     = null
+}
+
 variable "windows_auto_logon" {
   description = "Enable auto-logon after Windows guest customization."
   type        = bool

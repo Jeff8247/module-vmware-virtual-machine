@@ -165,6 +165,7 @@ resource "vsphere_virtual_machine" "this" {
           join_domain           = var.windows_domain
           domain_admin_user     = var.windows_domain_user
           domain_admin_password = var.windows_domain_password
+          organizational_unit   = var.windows_domain_ou
           auto_logon            = var.windows_auto_logon
           auto_logon_count      = var.windows_auto_logon ? var.windows_auto_logon_count : null
           time_zone             = var.time_zone != null ? tonumber(var.time_zone) : null
