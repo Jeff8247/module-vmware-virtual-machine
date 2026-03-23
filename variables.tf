@@ -373,8 +373,9 @@ variable "dns_suffix_list" {
 }
 
 variable "guest_id" {
-  description = "VMware guest OS identifier (e.g. ubuntu64Guest, windows2019srv_64Guest)."
+  description = "VMware guest OS identifier (e.g. ubuntu64Guest, windows2019srv_64Guest). Null inherits the guest ID from the source template."
   type        = string
+  default     = null
 }
 
 variable "is_windows" {

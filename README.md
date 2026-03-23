@@ -267,7 +267,7 @@ export TF_VAR_harbor_db_password="your-harbor-db-password"
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|----------|
-| `guest_id` | VMware guest OS identifier | `string` | — | yes |
+| `guest_id` | VMware guest OS identifier | `string` | inherited from template | no |
 | `is_windows` | Enable Windows customization | `bool` | `false` | no |
 | `computer_name` | Guest hostname (defaults to vm_name) | `string` | `null` | no |
 | `domain` | DNS domain | `string` | `null` | no |

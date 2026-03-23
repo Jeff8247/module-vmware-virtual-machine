@@ -25,6 +25,9 @@ locals {
   # Default num_cores_per_socket to num_cpus (single socket) when not explicitly set
   num_cores_per_socket = var.num_cores_per_socket != null ? var.num_cores_per_socket : var.num_cpus
 
+  # Inherit guest_id from the source template when not explicitly set
+  guest_id = var.guest_id != null ? var.guest_id : data.vsphere_virtual_machine.template.guest_id
+
   # Pair each NIC with its IP settings; interfaces without an entry fall back to DHCP (null values)
   nic_ip_settings = [
     for i, nic in var.network_interfaces : (
@@ -45,7 +48,7 @@ resource "vsphere_virtual_machine" "this" {
   annotation           = var.annotation
   tags                 = local.tag_ids
 
-  guest_id = var.guest_id
+  guest_id = local.guest_id
 
   firmware             = var.firmware
   hardware_version     = var.hardware_version
