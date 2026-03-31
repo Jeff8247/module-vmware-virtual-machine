@@ -5,6 +5,11 @@ All notable changes to this module will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.10] - 2026-04-01
+
+### Fixed
+- Added null guard to `windows_auto_logon_count` validation so the condition does not error when `null` is passed (e.g. for Linux VMs via a mixed-OS template).
+
 ## [1.0.9] - 2026-04-01
 
 ### Fixed
