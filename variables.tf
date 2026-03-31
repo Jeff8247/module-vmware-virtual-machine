@@ -458,7 +458,7 @@ variable "windows_auto_logon_count" {
   default     = 1
 
   validation {
-    condition     = var.windows_auto_logon_count > 0
+    condition     = var.windows_auto_logon_count == null || var.windows_auto_logon_count > 0
     error_message = "windows_auto_logon_count must be > 0."
   }
 }
