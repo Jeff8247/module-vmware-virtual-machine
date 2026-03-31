@@ -5,6 +5,11 @@ All notable changes to this module will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.9] - 2026-04-01
+
+### Fixed
+- Added `nullable = false` to all 17 boolean variables so that callers passing `null` fall back to the variable default rather than overriding it with `null`. Prevents precondition failures (e.g. `!var.vbs_enabled`) when a unified or mixed-OS template explicitly passes `null` for OS-specific boolean inputs.
+
 ## [1.0.8] - 2026-03-23
 
 ### Added

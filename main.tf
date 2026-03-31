@@ -78,9 +78,9 @@ resource "vsphere_virtual_machine" "this" {
   vbs_enabled             = var.vbs_enabled
   vvtd_enabled            = var.vvtd_enabled
   efi_secure_boot_enabled = var.efi_secure_boot_enabled
-  enable_disk_uuid      = var.enable_disk_uuid
-  enable_logging        = var.enable_logging
-  swap_placement_policy = var.swap_placement_policy
+  enable_disk_uuid        = var.enable_disk_uuid
+  enable_logging          = var.enable_logging
+  swap_placement_policy   = var.swap_placement_policy
 
   shutdown_wait_timeout       = var.shutdown_wait_timeout
   force_power_off             = var.force_power_off

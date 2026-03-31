@@ -81,6 +81,7 @@ variable "linked_clone" {
   description = "Create a linked clone instead of a full clone."
   type        = bool
   default     = false
+  nullable    = false
 }
 
 variable "num_cpus" {
@@ -99,12 +100,14 @@ variable "cpu_hot_add_enabled" {
   description = "Allow vCPUs to be added while the VM is running."
   type        = bool
   default     = false
+  nullable    = false
 }
 
 variable "cpu_hot_remove_enabled" {
   description = "Allow vCPUs to be removed while the VM is running."
   type        = bool
   default     = false
+  nullable    = false
 }
 
 variable "cpu_limit" {
@@ -156,6 +159,7 @@ variable "memory_hot_add_enabled" {
   description = "Allow memory to be added while the VM is running."
   type        = bool
   default     = false
+  nullable    = false
 }
 
 variable "memory_limit" {
@@ -382,6 +386,7 @@ variable "is_windows" {
   description = "Set to true to enable Windows-specific guest customization."
   type        = bool
   default     = false
+  nullable    = false
 }
 
 variable "computer_name" {
@@ -444,6 +449,7 @@ variable "windows_auto_logon" {
   description = "Enable auto-logon after Windows guest customization."
   type        = bool
   default     = false
+  nullable    = false
 }
 
 variable "windows_auto_logon_count" {
@@ -500,36 +506,42 @@ variable "nested_hv_enabled" {
   description = "Enable nested hardware virtualization (expose VMX flag to guest)."
   type        = bool
   default     = false
+  nullable    = false
 }
 
 variable "vbs_enabled" {
   description = "Enable Virtualization-based Security (Windows only)."
   type        = bool
   default     = false
+  nullable    = false
 }
 
 variable "efi_secure_boot_enabled" {
   description = "Enable EFI Secure Boot. Requires firmware = 'efi'. Recommended when vbs_enabled = true."
   type        = bool
   default     = false
+  nullable    = false
 }
 
 variable "vvtd_enabled" {
   description = "Enable Intel VT-d pass-through (I/O MMU)."
   type        = bool
   default     = false
+  nullable    = false
 }
 
 variable "enable_disk_uuid" {
   description = "Expose disk UUIDs to the guest OS. Required for some applications."
   type        = bool
   default     = true
+  nullable    = false
 }
 
 variable "enable_logging" {
   description = "Enable VMX logging for the virtual machine."
   type        = bool
   default     = false
+  nullable    = false
 }
 
 variable "swap_placement_policy" {
@@ -553,6 +565,7 @@ variable "force_power_off" {
   description = "Force power off the VM if graceful shutdown fails within shutdown_wait_timeout."
   type        = bool
   default     = true
+  nullable    = false
 }
 
 variable "migrate_wait_timeout" {
@@ -576,6 +589,7 @@ variable "wait_for_guest_net_routable" {
   description = "Require a routable (non-link-local) IP address before considering the VM ready."
   type        = bool
   default     = true
+  nullable    = false
 }
 
 variable "wait_for_guest_ip_timeout" {
@@ -588,6 +602,7 @@ variable "cdrom_enabled" {
   description = "Attach a CDROM device to the virtual machine."
   type        = bool
   default     = false
+  nullable    = false
 }
 
 variable "cdrom_datastore_id" {
@@ -606,6 +621,7 @@ variable "cdrom_client_device" {
   description = "Use a client-connected device instead of an ISO file."
   type        = bool
   default     = false
+  nullable    = false
 }
 
 variable "extra_config" {
@@ -618,6 +634,7 @@ variable "extra_config_reboot_required" {
   description = "Reboot the VM after applying extra_config changes."
   type        = bool
   default     = false
+  nullable    = false
 }
 
 variable "vapp_properties" {
