@@ -478,7 +478,7 @@ variable "linux_script_text" {
 variable "firmware" {
   description = "VM firmware type. One of: bios, efi."
   type        = string
-  default     = "bios"
+  default     = "efi"
 
   validation {
     condition     = contains(["bios", "efi"], var.firmware)
