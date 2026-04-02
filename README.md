@@ -274,14 +274,15 @@ export TF_VAR_harbor_db_password="your-harbor-db-password"
 | `time_zone` | Time zone (Olson for Linux, index for Windows) | `string` | `null` | no |
 | `windows_admin_password` | Windows local admin password (required when is_windows = true) | `string` | `null` | no |
 | `windows_workgroup` | Windows workgroup | `string` | `"WORKGROUP"` | no |
-| `windows_domain` | AD domain to join | `string` | `null` | no |
+| `windows_domain` | AD domain to join — used for Windows Sysprep and Linux `realm join` | `string` | `null` | no |
 | `windows_domain_user` | Domain join user | `string` | `null` | no |
 | `windows_domain_password` | Domain join password | `string` | `null` | no |
 | `windows_domain_ou` | OU distinguished name for the computer object (null = default Computers container) | `string` | `null` | no |
+| `windows_domain_netbios` | NetBIOS / short name of the domain (e.g. `CORP`) — Linux realm join only. Falls back to `windows_domain` when null | `string` | `null` | no |
 | `windows_auto_logon` | Enable auto-logon after customization | `bool` | `false` | no |
 | `windows_auto_logon_count` | Auto-logon count | `number` | `1` | no |
 | `windows_run_once` | Commands to run once post-customization | `list(string)` | `[]` | no |
-| `linux_script_text` | Inline shell script to run during Linux guest customization | `string` | `null` | no |
+| `linux_script_text` | Inline shell script to run during Linux guest customization. Appended after the domain join script when `windows_domain` is set | `string` | `null` | no |
 
 ### Hardware & Firmware
 
@@ -362,6 +363,7 @@ export TF_VAR_harbor_db_password="your-harbor-db-password"
 - `time_zone` for Windows must be a numeric string matching the [Microsoft time zone index](https://docs.microsoft.com/en-us/previous-versions/windows/embedded/ms912391(v=winembedded.11)).
 - `linked_clone` requires the template to have at least one snapshot.
 - The `clone` block is always required for this module (template-based deployment). For blank VM creation, fork and remove the clone block.
+- **Linux domain join**: when `is_windows = false` and `windows_domain` + `windows_domain_password` are set, the module automatically generates and runs a `realmd`/`sssd` join script. The script is idempotent (skips if already joined), retries up to 5 times, configures SSSD and Kerberos, and hardens PAM. Supply `linux_script_text` for any additional first-boot commands — they are appended after the domain join script.
 
 ---
 

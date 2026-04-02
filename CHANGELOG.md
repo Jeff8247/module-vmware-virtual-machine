@@ -5,6 +5,17 @@ All notable changes to this module will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.12] - 2026-04-02
+
+### Added
+- `windows_domain_netbios` variable — NetBIOS/short domain name used by the Linux realm join script. Defaults to `windows_domain` when null.
+- Linux AD domain join built into the module: when `is_windows = false` and `windows_domain` + `windows_domain_password` are set, the module automatically constructs and runs a `realmd`/`sssd` join script during guest customization. Previously this logic lived in each template.
+- Precondition validating that `windows_domain_user` and `windows_domain_password` are both set when `windows_domain` is specified for Linux VMs.
+
+### Changed
+- Linux domain join script aligned with Ansible reference implementation: idempotency check (`realm list` skip-if-joined), 5-attempt retry loop with sleep, NetBIOS name uppercased, authselect integrity check before enabling `without-nullok`, and PAM fallback limited to `system-auth`/`password-auth` (RHEL-only).
+- `linux_script_text` now appends to the module-generated domain join script rather than replacing it; pass additional first-boot commands without reimplementing domain join.
+
 ## [1.0.11] - 2026-04-01
 
 ### Changed
