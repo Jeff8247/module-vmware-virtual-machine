@@ -445,11 +445,6 @@ variable "windows_domain_ou" {
   default     = null
 }
 
-variable "windows_domain_netbios" {
-  description = "NetBIOS / short name of the domain (e.g. CORP). Used by the Linux realm join script. Defaults to windows_domain when null."
-  type        = string
-  default     = null
-}
 
 variable "windows_auto_logon" {
   description = "Enable auto-logon after Windows guest customization."

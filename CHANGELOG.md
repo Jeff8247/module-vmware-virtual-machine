@@ -5,6 +5,12 @@ All notable changes to this module will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.15] - 2026-04-02
+
+### Removed
+- Linux AD domain join script removed from the module. Joining a domain requires `realmd`, `sssd`, and related packages which are not available during VMware guest customization because the RHEL subscription manager registers repos in a later Ansible pipeline step. Domain join is handled exclusively by Ansible post-boot.
+- `windows_domain_netbios` variable removed (was only used by the Linux domain join script).
+
 ## [1.0.14] - 2026-04-02
 
 ### Changed
