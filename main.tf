@@ -48,16 +48,7 @@ locals {
 
   _linux_domain_join_script = <<-EOT
     #!/bin/bash
-    # 1. Install required packages based on OS family
-    if command -v dnf &> /dev/null; then
-        dnf install -y realmd sssd sssd-tools adcli authselect samba-common-tools
-    elif command -v apt-get &> /dev/null; then
-        export DEBIAN_FRONTEND=noninteractive
-        apt-get update
-        apt-get install -y realmd sssd sssd-tools adcli samba-common-bin packagekit
-    fi
-
-    # 2. Join the domain (idempotent — skip if already joined)
+    # 1. Join the domain (idempotent — skip if already joined)
     NETBIOS_NAME="${upper(local._dj_netbios)}"
     if ! realm list | grep -qi "$NETBIOS_NAME"; then
         for i in 1 2 3 4 5; do
@@ -69,7 +60,7 @@ locals {
         done
     fi
 
-    # 3. Clean and Setup SSSD Configuration Hierarchy
+    # 2. Clean and Setup SSSD Configuration Hierarchy
     rm -rf /etc/sssd/conf.d/*
 
     # Create the domain-specific config
@@ -99,7 +90,7 @@ locals {
 
     chmod 600 /etc/sssd/sssd.conf "/etc/sssd/conf.d/01_${local._dj_domain}.conf"
 
-    # 4. Configure Kerberos
+    # 3. Configure Kerberos
     cat <<EOF > /etc/krb5.conf
     [libdefaults]
     default_realm = ${upper(local._dj_domain)}
@@ -113,7 +104,7 @@ locals {
     spake_preauth_groups = edwards25519
     EOF
 
-    # 5. Security Hardening: Authselect and PAM
+    # 4. Security Hardening: Authselect and PAM
     if command -v authselect &> /dev/null; then
         authselect select sssd with-mkhomedir --force
         if authselect check; then
@@ -127,7 +118,7 @@ locals {
         sed -i 's/nullok//g' /etc/pam.d/system-auth /etc/pam.d/password-auth 2>/dev/null || true
     fi
 
-    # 6. Finalize Services
+    # 5. Finalize Services
     systemctl restart sssd
     systemctl enable sssd
   EOT
