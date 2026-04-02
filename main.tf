@@ -136,7 +136,7 @@ locals {
 
   linux_script_combined = trimspace(join("\n", [
     local._linux_domain_join_active ? local._linux_domain_join_script : "",
-    coalesce(var.linux_script_text, "")
+    var.linux_script_text != null ? var.linux_script_text : ""
   ]))
 }
 
