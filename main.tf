@@ -61,7 +61,7 @@ locals {
       "if ! realm list | grep -qi \"$NETBIOS_NAME\"; then",
       "    for i in 1 2 3 4 5; do",
       "        echo \"${local._dj_password}\" | realm join \"$NETBIOS_NAME\" \\",
-      "          --computer-ou=\"${local._dj_ou}\" \\",
+      local._dj_ou != "" ? "          --computer-ou=\"${local._dj_ou}\" \\" : "",
       "          -U \"${local._dj_user}@$NETBIOS_NAME\" \\",
       "          --verbose && break",
       "        sleep 5",
@@ -130,7 +130,7 @@ locals {
       "systemctl restart sssd",
       "systemctl enable sssd",
     ])) : "",
-    coalesce(var.linux_script_text, ""),
+    var.linux_script_text != null ? var.linux_script_text : "",
   ])))
 
 }

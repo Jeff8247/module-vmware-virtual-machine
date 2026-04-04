@@ -5,6 +5,12 @@ All notable changes to this module will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.18] - 2026-04-04
+
+### Fixed
+- `linux_script_combined`: replaced `coalesce(var.linux_script_text, "")` with a null-check ternary to prevent "no non-null, non-empty-string arguments" plan error when `linux_script_text` is not set.
+- `linux_script_combined`: `--computer-ou` argument is now omitted from the `realm join` command when `windows_domain_ou` is null, preventing a failed join caused by passing an empty string to `--computer-ou`.
+
 ## [1.0.17] - 2026-04-04
 
 ### Changed
