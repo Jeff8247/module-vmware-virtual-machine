@@ -5,6 +5,13 @@ All notable changes to this module will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.19] - 2026-04-04
+
+### Fixed
+- `linux_script_combined`: `realm join` now targets the FQDN (`windows_domain`) instead of the NetBIOS/short name, ensuring DNS can resolve the KDC.
+- `linux_script_combined`: `-U` flag now passes just the username (no `@NETBIOS_NAME` suffix) to prevent double-domain UPN errors when the user is already supplied as a full UPN.
+- `linux_script_combined`: Added `oddjob-mkhomedir` and `krb5-workstation` to the `dnf install` line — required by `authselect with-mkhomedir` and `adcli`/`realm` on RHEL.
+
 ## [1.0.18] - 2026-04-04
 
 ### Fixed
