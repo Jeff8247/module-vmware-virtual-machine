@@ -37,6 +37,108 @@ locals {
     )
   ]
 
+  # ─── Linux Domain Join ───────────────────────────────────────────────────────
+  # Null-safe intermediates — evaluated regardless of _dj_active, so must never error.
+  _dj_domain   = try(coalesce(var.windows_domain, ""), "")
+  _dj_password = try(coalesce(var.windows_domain_password, ""), "")
+  _dj_netbios  = upper(try(coalesce(var.windows_domain_netbios, var.windows_domain), ""))
+  _dj_user     = try(coalesce(var.windows_domain_user, ""), "")
+  _dj_ou       = try(coalesce(var.windows_domain_ou, ""), "")
+  _proxy       = try(coalesce(var.proxy_url, ""), "")
+
+  _dj_active = !var.is_windows && var.windows_domain != null && var.windows_domain_password != null
+
+  linux_script_combined = trimspace(join("\n", compact([
+    local._dj_active ? join("\n", compact([
+      "#!/bin/bash",
+      "# 1. Install required packages based on OS family",
+      local._proxy != "" ? "export HTTP_PROXY=\"${local._proxy}\" HTTPS_PROXY=\"${local._proxy}\"" : "",
+      "if command -v dnf &> /dev/null; then",
+      "    dnf install -y realmd sssd sssd-tools adcli authselect samba-common-tools",
+      "elif command -v apt-get &> /dev/null; then",
+      "    export DEBIAN_FRONTEND=noninteractive",
+      "    apt-get update",
+      "    apt-get install -y realmd sssd sssd-tools adcli samba-common-bin packagekit",
+      "fi",
+      local._proxy != "" ? "unset HTTP_PROXY HTTPS_PROXY" : "",
+      "",
+      "# 2. Join the domain (idempotent — skip if already joined)",
+      "NETBIOS_NAME=\"${local._dj_netbios}\"",
+      "if ! realm list | grep -qi \"$NETBIOS_NAME\"; then",
+      "    for i in 1 2 3 4 5; do",
+      "        echo \"${local._dj_password}\" | realm join \"$NETBIOS_NAME\" \\",
+      "          --computer-ou=\"${local._dj_ou}\" \\",
+      "          -U \"${local._dj_user}@$NETBIOS_NAME\" \\",
+      "          --verbose && break",
+      "        sleep 5",
+      "    done",
+      "fi",
+      "",
+      "# 3. Clean and Setup SSSD Configuration Hierarchy",
+      "rm -rf /etc/sssd/conf.d/*",
+      "",
+      "# Create the domain-specific config",
+      "cat <<EOF > \"/etc/sssd/conf.d/01_${local._dj_domain}.conf\"",
+      "[domain/${local._dj_domain}]",
+      "ad_domain = ${local._dj_domain}",
+      "krb5_realm = ${local._dj_netbios}",
+      "realmd_tags = manages-system joined-with-adcli",
+      "cache_credentials = True",
+      "id_provider = ad",
+      "krb5_store_password_if_offline = True",
+      "default_shell = /bin/bash",
+      "ldap_id_mapping = True",
+      "use_fully_qualified_names = False",
+      "fallback_homedir = /home/%u",
+      "access_provider = ad",
+      "EOF",
+      "",
+      "# Create primary sssd.conf",
+      "cat <<EOF > /etc/sssd/sssd.conf",
+      "[sssd]",
+      "domains = ${local._dj_domain}",
+      "config_file_version = 2",
+      "services = nss, pam",
+      "ad_enabled_domains = ${local._dj_domain}",
+      "EOF",
+      "",
+      "chmod 600 /etc/sssd/sssd.conf \"/etc/sssd/conf.d/01_${local._dj_domain}.conf\"",
+      "",
+      "# 4. Configure Kerberos",
+      "cat <<EOF > /etc/krb5.conf",
+      "[libdefaults]",
+      "default_realm = ${local._dj_netbios}",
+      "dns_lookup_realm = false",
+      "dns_lookup_kdc = true",
+      "ticket_lifetime = 24h",
+      "renew_lifetime = 7d",
+      "forwardable = true",
+      "rdns = false",
+      "pkinit_anchors = FILE:/etc/pki/tls/certs/ca-bundle.crt",
+      "spake_preauth_groups = edwards25519",
+      "EOF",
+      "",
+      "# 5. Security Hardening: Authselect and PAM",
+      "if command -v authselect &> /dev/null; then",
+      "    authselect select sssd with-mkhomedir --force",
+      "    if authselect check; then",
+      "        CURRENT_FEATURES=$(authselect current | tail -n+3 | awk '{ print $2 }')",
+      "        if ! echo \"$CURRENT_FEATURES\" | grep -q \"without-nullok\"; then",
+      "            authselect enable-feature without-nullok",
+      "            authselect apply-changes -b",
+      "        fi",
+      "    fi",
+      "else",
+      "    sed -i 's/nullok//g' /etc/pam.d/system-auth /etc/pam.d/password-auth 2>/dev/null || true",
+      "fi",
+      "",
+      "# 6. Finalize Services",
+      "systemctl restart sssd",
+      "systemctl enable sssd",
+    ])) : "",
+    coalesce(var.linux_script_text, ""),
+  ])))
+
 }
 
 resource "vsphere_virtual_machine" "this" {
@@ -157,7 +259,7 @@ resource "vsphere_virtual_machine" "this" {
           host_name   = local.computer_name
           domain      = var.domain
           time_zone   = var.time_zone
-          script_text = var.linux_script_text
+          script_text = local.linux_script_combined != "" ? local.linux_script_combined : null
         }
       }
 
