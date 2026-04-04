@@ -127,6 +127,7 @@ locals {
       "fi",
       "",
       "# 6. Finalize Services",
+      "systemctl enable --now oddjobd",
       "systemctl restart sssd",
       "systemctl enable sssd",
     ])) : "",
