@@ -51,10 +51,10 @@ module "vm" {
   customize_timeout = var.customize_timeout
 
   vapp_properties = {
-    "hostname"             = var.harbor_hostname
+    "hostname"              = var.harbor_hostname
     "harbor_admin_password" = var.harbor_admin_password
-    "db_password"          = var.harbor_db_password
-    "log_level"            = var.harbor_log_level
-    "gc_enabled"           = tostring(var.harbor_gc_enabled)
+    "db_password"           = var.harbor_db_password
+    "log_level"             = var.harbor_log_level
+    "gc_enabled"            = tostring(var.harbor_gc_enabled)
   }
 }
