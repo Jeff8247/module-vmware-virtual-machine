@@ -5,10 +5,15 @@ All notable changes to this module will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.17] - 2026-04-04
+
+### Changed
+- Linux domain join package install now targets RHEL-family systems only (`dnf`). The `apt-get` branch has been removed.
+
 ## [1.0.16] - 2026-04-04
 
 ### Added
-- Linux AD domain join via `realmd`/`sssd` script generated and run during VMware guest customization. Activated when `is_windows = false` and both `windows_domain` and `windows_domain_password` are set. The script installs required packages, performs an idempotent realm join with 5 retries, configures SSSD and Kerberos, and hardens PAM. Works on both RHEL-family and Debian/Ubuntu guests.
+- Linux AD domain join via `realmd`/`sssd` script generated and run during VMware guest customization. Activated when `is_windows = false` and both `windows_domain` and `windows_domain_password` are set. The script installs required packages, performs an idempotent realm join with 5 retries, configures SSSD and Kerberos, and hardens PAM. Targets RHEL-family systems.
 - `windows_domain_netbios` variable — NetBIOS/short domain name for the Linux realm join command. Falls back to `windows_domain` when null.
 - `proxy_url` variable — HTTP/HTTPS proxy URL set as `HTTP_PROXY`/`HTTPS_PROXY` for the package install step only; unset immediately after. Null disables proxy.
 - `linux_script_text` is appended after the domain join script when both are set.

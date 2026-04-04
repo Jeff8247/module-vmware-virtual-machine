@@ -51,15 +51,9 @@ locals {
   linux_script_combined = trimspace(join("\n", compact([
     local._dj_active ? join("\n", compact([
       "#!/bin/bash",
-      "# 1. Install required packages based on OS family",
+      "# 1. Install required packages (RHEL-family)",
       local._proxy != "" ? "export HTTP_PROXY=\"${local._proxy}\" HTTPS_PROXY=\"${local._proxy}\"" : "",
-      "if command -v dnf &> /dev/null; then",
-      "    dnf install -y realmd sssd sssd-tools adcli authselect samba-common-tools",
-      "elif command -v apt-get &> /dev/null; then",
-      "    export DEBIAN_FRONTEND=noninteractive",
-      "    apt-get update",
-      "    apt-get install -y realmd sssd sssd-tools adcli samba-common-bin packagekit",
-      "fi",
+      "dnf install -y realmd sssd sssd-tools adcli authselect samba-common-tools",
       local._proxy != "" ? "unset HTTP_PROXY HTTPS_PROXY" : "",
       "",
       "# 2. Join the domain (idempotent — skip if already joined)",
