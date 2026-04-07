@@ -5,6 +5,14 @@ All notable changes to this module will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.22] - 2026-04-07
+
+### Removed
+- Linux AD domain join via `realmd`/`sssd` — the bash script, all `_dj_*` intermediate locals, `linux_script_combined`, and the `script_text` field from the `linux_options` block have been removed. Linux domain join is now handled by Ansible post-boot.
+- `windows_domain_netbios` variable — was used only by the Linux `realm join` command.
+- `proxy_url` variable — was used only for the Linux package install step during domain join.
+- `linux_script_text` variable — inline guest customization script, removed along with the `script_text` field that consumed it.
+
 ## [1.0.21] - 2026-04-04
 
 ### Documentation

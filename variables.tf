@@ -445,18 +445,6 @@ variable "windows_domain_ou" {
   default     = null
 }
 
-variable "windows_domain_netbios" {
-  description = "NetBIOS/short name of the domain (e.g. CORP). Used by the Linux realm join script. Defaults to windows_domain when null."
-  type        = string
-  default     = null
-}
-
-variable "proxy_url" {
-  description = "HTTP/HTTPS proxy URL applied during the Linux domain join package install step (e.g. http://proxy.corp.example.com:8080). Exported as HTTP_PROXY/HTTPS_PROXY before package install and unset immediately after. Null disables proxy."
-  type        = string
-  default     = null
-}
-
 variable "windows_auto_logon" {
   description = "Enable auto-logon after Windows guest customization."
   type        = bool
@@ -479,12 +467,6 @@ variable "windows_run_once" {
   description = "List of commands to run once after Windows guest customization completes."
   type        = list(string)
   default     = []
-}
-
-variable "linux_script_text" {
-  description = "Inline shell script to run during Linux guest customization. Requires open-vm-tools to support script execution."
-  type        = string
-  default     = null
 }
 
 variable "firmware" {

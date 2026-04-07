@@ -20,7 +20,6 @@ Compatible with the [Terraform Registry](https://registry.terraform.io/) module 
 - Nested virtualization, VBS, VT-d pass-through
 - EFI/BIOS firmware selection
 - Datastore cluster (Storage DRS) support
-- Linux AD domain join via `realmd`/`sssd` during guest customization (RHEL-family)
 
 ---
 
@@ -282,9 +281,6 @@ export TF_VAR_harbor_db_password="your-harbor-db-password"
 | `windows_auto_logon` | Enable auto-logon after customization | `bool` | `false` | no |
 | `windows_auto_logon_count` | Auto-logon count | `number` | `1` | no |
 | `windows_run_once` | Commands to run once post-customization | `list(string)` | `[]` | no |
-| `linux_script_text` | Inline shell script appended after the domain join script during Linux guest customization | `string` | `null` | no |
-| `windows_domain_netbios` | NetBIOS/short domain name for the Linux realm join command (falls back to `windows_domain` when null) | `string` | `null` | no |
-| `proxy_url` | HTTP/HTTPS proxy URL set during package install only (Linux domain join); null disables proxy | `string` | `null` | no |
 
 ### Hardware & Firmware
 
@@ -365,7 +361,7 @@ export TF_VAR_harbor_db_password="your-harbor-db-password"
 - `time_zone` for Windows must be a numeric string matching the [Microsoft time zone index](https://docs.microsoft.com/en-us/previous-versions/windows/embedded/ms912391(v=winembedded.11)).
 - `linked_clone` requires the template to have at least one snapshot.
 - The `clone` block is always required for this module (template-based deployment). For blank VM creation, fork and remove the clone block.
-- **Linux domain join** is activated automatically when `is_windows = false` and both `windows_domain` and `windows_domain_password` are set. The module generates and runs a `realmd`/`sssd` script during guest customization. Targets RHEL-family systems only (`dnf`). Use `linux_script_text` to append additional first-boot commands after the domain join script.
+- Linux AD domain join is not handled by this module — use Ansible or another configuration management tool post-boot.
 
 ---
 
