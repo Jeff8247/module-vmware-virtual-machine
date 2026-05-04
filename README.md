@@ -362,6 +362,7 @@ export TF_VAR_harbor_db_password="your-harbor-db-password"
 - `linked_clone` requires the template to have at least one snapshot.
 - The `clone` block is always required for this module (template-based deployment). For blank VM creation, fork and remove the clone block.
 - Linux AD domain join is not handled by this module — use Ansible or another configuration management tool post-boot.
+- Updating the source template in vCenter (e.g. refreshing a snapshot after a patch cycle) will **not** trigger VM recreation. Both `clone[0].template_uuid` and `clone[0].customize` are in `lifecycle.ignore_changes` — the template is used once at clone time and ignored on subsequent plans.
 
 ---
 

@@ -5,6 +5,11 @@ All notable changes to this module will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.23] - 2026-05-04
+
+### Fixed
+- `lifecycle.ignore_changes` now includes `clone[0].template_uuid` alongside the existing `clone[0].customize` entry. Without this, updating a template in vCenter (e.g. converting a newer snapshot) causes `terraform plan` to detect drift and propose VM recreation. The template used at clone time is the source of truth; subsequent template updates should not affect running VMs managed by Ansible post-boot.
+
 ## [1.0.22] - 2026-04-07
 
 ### Removed

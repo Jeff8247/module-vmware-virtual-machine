@@ -197,7 +197,10 @@ resource "vsphere_virtual_machine" "this" {
   # persist it back to state, causing drift on every subsequent plan.
   # ignore_changes requires a static list.
   lifecycle {
-    ignore_changes = [clone[0].customize]
+    ignore_changes = [
+      clone[0].customize,
+      clone[0].template_uuid,
+    ]
 
     precondition {
       condition     = var.cluster != null || var.resource_pool != null
